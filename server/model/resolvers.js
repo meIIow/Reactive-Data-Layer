@@ -23,6 +23,11 @@ resolvers.Topic = {
   authors: () => ['Max', 'Max'],
 };
 
+resolvers.Comment = {
+  topic: (_, { id }) => contentController.topic(id),
+};
+
+
 resolvers.User = {
   username: ({ username }) => username.toUpperCase(),
 };

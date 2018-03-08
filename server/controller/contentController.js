@@ -33,10 +33,11 @@ contentController.comment = () => {
 // Add a comment to db
 contentController.addComment = (input) => {
   const comment = new Comments(input);
-  comment.save()
+  return comment.save()
     .then((result) => {
-      Topics.findByIdAndUpdate(result.topic, { $push: { comments: result._id } }, { new: true })
-        .then(result => result)
+      console.log(result);
+      return Topics.findByIdAndUpdate(result.topic, { $push: { comments: result._id } }, { new: true })
+        .then(topicResult => result)
         .catch(err => console.log(err));
     })
 };
