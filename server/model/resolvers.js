@@ -14,6 +14,7 @@ resolvers.Mutation = {
   addComment: (_, comment) => contentController.addComment(comment),
   addUser: (_, user) => userController.addUser(user.input),
   updateUser: (_, { id, update }) => userController.updateUser(id, update),
+  like: (_, { id }) => contentController.like(id),
 };
 
 resolvers.Topic = {

@@ -36,12 +36,15 @@ contentController.addComment = (input) => {
   comment.save()
     .then((result) => {
       Topics.findByIdAndUpdate(result.topic, { $push: { comments: result._id } }, { new: true })
-        .then(result)
+        .then(result => result)
+        .catch(err => console.log(err));
     })
-
-    //Users.findByIdAndUpdate(id, { username: update }, { new: true })
-    //.then(result => result)
-  // return user.save().then(result => result);
 };
 
+// Like a comment in db
+contentController.like = (input) => {
+  return Comments.findByIdAndUpdate(input, { $inc : { score: 1 } }, { new: true })
+    .then(result => result)
+    .catch(err => console.log(err));
+}
 module.exports = contentController;

@@ -40,60 +40,71 @@ const directiveResolvers = {
   live: (resolve, source, args, context, info) => {
     // Check if this is the top of the query
     if (!context.live) {
-      const GraphQLType = info.fieldName;
+      const returnType = info.fieldName;
       // This GraphQL type doesn't exist in the RDL
-      if (!RDL.data[GraphQLType]) {
-        RDL.data[GraphQLType] = {};
+      if (!RDL.data[returnType]) {
+        RDL.data[returnType] = {};
       }
       // context.live stores a reference to the RDL GraphQL type tree
-      context.live = RDL.data[GraphQLType];
+      context.live = RDL.data[returnType];
+      // Store the ws and Query info in the fucking RDL
+      // RDL.subscribers['handle'] = 'Query';
     }
 
     let store = context.live;
     if (Array.isArray(store)) {
+      // Indexing things in store
       store = store[source.live];
     }
 
     return resolve().then((val) => {
-      // console.log('------------------');
-      // console.log('context', context.live);
       // The GraphQL type that is returned from the resolver
       const { returnType } = info;
-
-      // The return type is an array
       const returnTypeString = returnType.toString();
+
+      // The return type is an array    
       if (returnTypeString[0] === '[') {
-        // The GraphQL type of the array
         const arrayType = returnType.ofType;
 
         // Remove the array brackets
         const returnTypeStringSliced = returnTypeString.substring(1, returnTypeString.length - 1);
-
+        
+        // The array is an object type
         if (arrayType._typeConfig) {
           // Check if the tree for this type exists
           if (!RDL.data[returnTypeStringSliced]) {
             RDL.data[returnTypeStringSliced] = {};
           }
-          // Store the field name as the key
+          // Store the field name as the object key
           const field = info.fieldName;
           if (!store[field]) {
             store[field] = {
               data: { type: returnTypeStringSliced, id: [] },
-              subscribers: ['me'],
-            }
+              subscribers: ['handle'],
+            };
+          } else {
+            store[field].data.id = [];
+            // Check if ws handle is in subscribers array
+            /**
+             * DO STUFF HERE!!!!!!!!!!!
+             */
+            store[field].subscribers.push('handle2');
           }
           const contextArray = [];
           for (let i = 0; i < val.length; i += 1) {
             val[i].live = i;
+            // Dependencies must have a unique id
             const id = val[i]._id;
             // Check if the object exists in the tree
             if (!RDL.data[returnTypeStringSliced][id]) {
               RDL.data[returnTypeStringSliced][id] = {};
             }
-
-            // Maybe store dependencies
             contextArray.push(RDL.data[returnTypeStringSliced][id]);
             // Push object ids into array
+            // store[field] = {
+            //   data: { type: returnTypeStringSliced, id: [] },
+            //   subscribers: ['handle'],
+            // };
             store[field].data.id.push(id);
           }
           context.live = contextArray;
@@ -104,10 +115,27 @@ const directiveResolvers = {
             store[field] = {
               data: val,
               subscribers: ['me'],
+            };
+          } else {
+            const current = store[field].data;
+            if (current.length !== val.length) {
+              store[field].data = val;
+              store[field].subscribers.forEach((handle) => {
+                RDL.queue[handle] = 'SEND ME DATA';
+              });
+            } else {
+              for (let i = 0; i < current.length; i += 1) {
+                if (current[i] !== val[i]) {
+                  store[field].data = val;
+                  store[field].subscribers.forEach((handle) => {
+                    RDL.queue[handle] = 'SEND ME DATA';
+                  });
+                  break;
+                }
+              }
             }
           }
-          // WE NEED TO CHECK FOR CUSTOM SCALAR TYPES
-
+          // WE NEED TO CHECK FOR CUSTOM SCALAR TYPES? Maybe...
         }
       }
       // This is a GraphQL Object Type
@@ -132,6 +160,12 @@ const directiveResolvers = {
             }
           } else {
             // The data already exists. Add users as a subscriber.
+            if (store[field].data.id !== id) {
+              store[field].data.id = id;
+              store[field].subscribers.forEach((handle) => {
+                RDL.queue[handle] = 'SEND ME DATA';
+              });
+            }
             store[field].subscribers.push('me');
           }
           // Check if the tree for this type exists
@@ -156,10 +190,16 @@ const directiveResolvers = {
           };
         } else {
           // The data already exists. Add users as a subscriber.
+          if (store[field].data !== val) {
+            store[field].data = val;
+            store[field].subscribers.forEach((handle) => {
+              RDL.queue[handle] = 'SEND ME DATA';
+            });
+          }
           store[field].subscribers.push('me');
         }
       }
-      console.log(RDL.data.Comment);
+      console.log(RDL);
       return val;
     });
   },
