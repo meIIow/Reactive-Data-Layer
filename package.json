@@ -1,0 +1,48 @@
+{
+  "name": "graphql",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "apollo-cache-inmemory": "^1.1.9",
+    "apollo-client": "^2.2.5",
+    "apollo-client-preset": "^1.0.8",
+    "apollo-link-http": "^1.5.2",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.3",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.24.1",
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "express-graphql": "^0.6.12",
+    "graphql": "^0.13.1",
+    "graphql-subscriptions": "^0.5.8",
+    "graphql-tag": "^2.8.0",
+    "graphql-tools": "^2.21.0",
+    "mongoose": "^5.0.8",
+    "path": "^0.12.7",
+    "react": "^16.2.0",
+    "react-apollo": "^2.0.4",
+    "react-dom": "^16.2.0",
+    "react-scripts": "1.1.1",
+    "webpack": "^4.0.1",
+    "webpack-cli": "^2.0.10"
+  },
+  "scripts": {
+    "webpack": "webpack -w",
+    "start": "webpack -w & nodemon ./server/server.js"
+  },
+  "description": "Full-stack GraphQL tutorials with React, Redux and Apollo",
+  "main": "webpack.config.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apollographql/graphql-tutorial.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/apollographql/graphql-tutorial/issues"
+  },
+  "homepage": "https://github.com/apollographql/graphql-tutorial#readme"
+}
