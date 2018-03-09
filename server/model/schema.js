@@ -58,7 +58,7 @@ const directiveResolvers = {
 
     // if first resolver, set context.live
     if (rootResolver) {
-      console.log('root', info);
+      //console.log('root', info);
       context.live = {};
       context.live.location = setOneLiveContext(typeString);
       context.live.handles = {};
@@ -95,10 +95,10 @@ const directiveResolvers = {
         // sets context for nested resolvers
         if (isObject) {context.live.location = setLiveContext(typeString, isArray, val)};
 
-        store[field].subscribers.handle = true; // add current handle to subscribers
+        store[field].subscribers[handle] = true; // add current handle to subscribers
       }
-      // console.log(handles);
-      // console.log(RDL.data);
+      console.log(handles);
+      console.log(RDL.data.Comment);
       return val;
     });
   },
@@ -114,6 +114,7 @@ function resultIsObject(type) {
   return (!!typeObj._typeConfig)
 }
 
+// figures out context info of single object or array of objects
 function setLiveContext(typeString, isArray, val) {
   if (!isArray) return setOneLiveContext(typeString, val._id);
   return val.map((obj, i) => {
@@ -122,6 +123,7 @@ function setLiveContext(typeString, isArray, val) {
   })
 }
 
+// creates (if neccesary) and returns context of a single object
 function setOneLiveContext(typeString, id) {
   if (!RDL.data[typeString]) {
     RDL.data[typeString] = {};
@@ -135,6 +137,7 @@ function setOneLiveContext(typeString, id) {
 }
 
 function setField(isArray, typeString) {
+  // initialized field to default 'empty' state
   return ({
     data: (isArray ? [] : null),
     subscribers: {},
@@ -142,16 +145,19 @@ function setField(isArray, typeString) {
   });
 }
 
+// compares old data to newly resolved data
 function diffField(field, val, isArray, isObject, handles) {
-let comp;
+  let comp;
   let changed = false;
 
   if (isArray) {
-    comp = val.map((obj, i) => {return setComparison(val, isObject)});
+    comp = val.map((obj, i) => {return setComparison(obj, isObject)});
+
+    // compare each value of new data to old data
     changed = val.reduce((acc, curr, i) => {
-      return (acc && curr === field.data[i]);
-    })
-    changed = changed && (comp.length === field.data.length);
+      return (acc || curr !== field.data[i]);
+    }, false)
+    changed = changed || (comp.length !== field.data.length);
 
   } else {
     comp = setComparison(val, isObject);
@@ -159,11 +165,15 @@ let comp;
   }
 
   if (changed) {
-    field.data = comp;
+    console.log('-------------THERE WAS A CHANGE------------------')
+    field.data = comp; // overwrite field
+
+    // add subscribers of this data to list of handls to be fired back
     Object.assign(handles, field.subscribers);
   }
 }
 
+// grabs id if object, val if scalar
 function setComparison(val, isObject) {
   return (isObject) ? val._id : val;
 }
