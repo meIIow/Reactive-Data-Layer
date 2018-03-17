@@ -21,10 +21,12 @@ resolvers.Topic = {
   comments: ({ _id }) => contentController.comments(_id),
   comment: () => contentController.comment(),
   authors: () => ['Max', 'Max'],
+  id: ({ _id }) => _id
 };
 
 resolvers.Comment = {
   topic: (_, { id }) => contentController.topic(id),
+  id: ({ _id }) => _id
 };
 
 
